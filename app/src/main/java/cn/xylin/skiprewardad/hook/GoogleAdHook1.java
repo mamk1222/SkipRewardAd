@@ -43,7 +43,7 @@ public class GoogleAdHook1 extends BaseHook {
                             XposedBridge.hookAllMethods(clazz, "setFullScreenContentCallback", new XC_MethodHook() {
                                 @Override
                                 protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                                    if (param.args.length == 1 && param.args[0] == null) {
+                                    if (param.args.length == 1 && param.args[0] != null) {
                                         listener = param.args[0];
                                     }
                                 }

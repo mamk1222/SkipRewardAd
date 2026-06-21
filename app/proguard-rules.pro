@@ -1,0 +1,2 @@
+-keep class cn.xylin.skiprewardad.Start { *; }
+-keep class cn.xylin.skiprewardad.hook.** { *; }

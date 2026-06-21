@@ -43,9 +43,11 @@ public class ApplovinAdHook extends BaseHook {
             @Override
             protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                 if (listener != null && maxAd != null) {
+                    callMethod(listener, "onAdDisplayed", maxAd);
                     callMethod(listener, "onRewardedVideoStarted", maxAd);
                     callMethod(listener, "onUserRewarded", maxAd, defReward);
                     callMethod(listener, "onRewardedVideoCompleted", maxAd);
+                    callMethod(listener, "onAdHidden", maxAd);
                     param.setResult(null);
                     log("ApplovinAd-发放奖励");
                 }
