@@ -14,8 +14,8 @@ android {
         applicationId "me.kmdev.skiprewardad"
         minSdk 21
         targetSdk 32
-        versionCode 3041922
-        versionName "1.4"
+        versionCode 3041923
+        versionName "1.5"
     }
     signingConfigs {
         release {

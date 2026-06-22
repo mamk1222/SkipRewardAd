@@ -21,11 +21,22 @@ public class UnityAdHook2 extends UnityAdHook1 {
         XposedBridge.hookAllMethods(claza, "show", new XC_MethodHook() {
             @Override
             protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                String placementId = "rewardedVideo";
+                Object targetListener = null;
                 for (Object obj : param.args) {
-                    if (clazb.isInstance(obj)) {
-                        listener = obj;
-                        return;
+                    if (obj instanceof String) {
+                        placementId = (String) obj;
                     }
+                    if (clazb.isInstance(obj)) {
+                        targetListener = obj;
+                    }
+                }
+                if (targetListener != null) {
+                    listener = targetListener;
+                    callMethod(targetListener, "onUnityAdsShowStart", placementId);
+                    callMethod(targetListener, "onUnityAdsShowComplete", placementId, fakeEnum);
+                    param.setResult(null);
+                    log("UnityAd2-发放奖励");
                 }
             }
         });
