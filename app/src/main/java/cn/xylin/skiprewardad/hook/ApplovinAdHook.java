@@ -66,7 +66,8 @@ public class ApplovinAdHook extends BaseHook {
     private void hookAnaPocketWrapper() {
         Class<?> maxAdWrapperClass = findClass("us.ana_pocket.ANAPocket.utils.MaxAdWrapper");
         Class<?> rewardedWrapperClass = findClass("us.ana_pocket.ANAPocket.utils.MaxRewardedAdWrapper");
-        if (maxAdWrapperClass == null || rewardedWrapperClass == null) {
+        Class<?> interstitialWrapperClass = findClass("us.ana_pocket.ANAPocket.utils.MaxInterstitialAdWrapper");
+        if (maxAdWrapperClass == null) {
             return;
         }
         XposedBridge.hookAllMethods(maxAdWrapperClass, "setListener", new XC_MethodHook() {
@@ -77,24 +78,51 @@ public class ApplovinAdHook extends BaseHook {
                 }
             }
         });
-        XposedBridge.hookAllMethods(rewardedWrapperClass, "showAdImpl", new XC_MethodHook() {
-            @Override
-            protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                Object wrapper = param.thisObject;
-                Object targetListener = anaListener;
-                if (targetListener == null) {
-                    targetListener = XposedHelpers.getStaticObjectField(maxAdWrapperClass, "listener");
+        if (rewardedWrapperClass != null) {
+            XposedBridge.hookAllMethods(rewardedWrapperClass, "showAdImpl", new XC_MethodHook() {
+                @Override
+                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                    Object wrapper = param.thisObject;
+                    Object targetListener = findAnaPocketListener(maxAdWrapperClass);
+                    if (targetListener != null && wrapper != null) {
+                        callMethod(targetListener, "onAdDisplayed", wrapper);
+                        callMethod(targetListener, "onUserRewarded", wrapper, defReward);
+                        finishAnaPocketWrapper(wrapper);
+                        callMethod(targetListener, "onAdHidden", wrapper);
+                        param.setResult(null);
+                        log("ApplovinAd-ANA Pocket rewarded wrapper reward");
+                    }
                 }
-                if (targetListener != null && wrapper != null) {
-                    callMethod(targetListener, "onAdDisplayed", wrapper);
-                    callMethod(targetListener, "onUserRewarded", wrapper, defReward);
-                    finishAnaPocketWrapper(wrapper);
-                    callMethod(targetListener, "onAdHidden", wrapper);
-                    param.setResult(null);
-                    log("ApplovinAd-ANA Pocket wrapper reward");
+            });
+        }
+        if (interstitialWrapperClass != null) {
+            XposedBridge.hookAllMethods(interstitialWrapperClass, "showAdImpl", new XC_MethodHook() {
+                @Override
+                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                    Object wrapper = param.thisObject;
+                    Object targetListener = findAnaPocketListener(maxAdWrapperClass);
+                    if (targetListener != null && wrapper != null) {
+                        callMethod(targetListener, "onAdDisplayed", wrapper);
+                        finishAnaPocketWrapper(wrapper);
+                        callMethod(targetListener, "onAdHidden", wrapper);
+                        param.setResult(null);
+                        log("ApplovinAd-ANA Pocket interstitial wrapper skip");
+                    }
                 }
-            }
-        });
+            });
+        }
+    }
+
+    private Object findAnaPocketListener(Class<?> maxAdWrapperClass) {
+        Object targetListener = anaListener;
+        if (targetListener != null) {
+            return targetListener;
+        }
+        try {
+            return XposedHelpers.getStaticObjectField(maxAdWrapperClass, "listener");
+        } catch (Throwable ignore) {
+        }
+        return null;
     }
 
     private void finishAnaPocketWrapper(Object wrapper) {

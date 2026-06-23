@@ -52,15 +52,13 @@ public class Start implements IXposedHookLoadPackage {
         new SigmobAdHook(baseContext);
         new MintegralAdHook(baseContext);
         new UnityAdHook1(baseContext);
-        // Temporarily disabled for ANA Pocket debugging: this hook blocks ad trigger.
-        // new UnityAdHook2(baseContext);
+        new UnityAdHook2(baseContext);
         new KsAdHook(baseContext);
         new VungleAdHook(baseContext);
-        // Temporarily disabled for ANA Pocket debugging: Google Ads show flow cannot trigger.
-        // new GoogleAdHook1(baseContext);
+        new GoogleAdHook1(baseContext);
         new ApplovinAdHook(baseContext);
         new MolocoAdHook(baseContext);
-        // new FyberAdHook(baseContext);
+        new FyberAdHook(baseContext);
         // new AnaPocketDebugHook(baseContext);
     }
 }
